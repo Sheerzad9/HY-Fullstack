@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import mainService from "./services/mainsvc";
 
-const Persons = ({ persons }) => {
+const Persons = ({ persons, onDelete }) => {
   return (
     <div>
       {persons.map((person) => (
-        <p
-          key={person.name}
-        >{`Name: ${person.name}, Number: ${person.number}`}</p>
+        <p key={person.name}>
+          {`Name: ${person.name}, Number: ${person.number}`}{" "}
+          <button onClick={() => onDelete(person)}>Delete</button>{" "}
+        </p>
       ))}
     </div>
   );
@@ -52,19 +53,50 @@ const App = () => {
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
-      .then((res) => setPersons(res.data));
+    mainService.getAll().then((initialPersons) => setPersons(initialPersons));
   }, []);
 
   const onAddNewPerson = (e) => {
     e.preventDefault();
-    if (persons.find((person) => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`);
+    const existingPerson = persons.find((person) => person.name === newName);
+    if (existingPerson) {
+      // Confirmation to proceed to update existing contact
+      if (
+        window.confirm(
+          `${existingPerson.name} is already in the phonebook, replace the old number with the new one?`
+        )
+      ) {
+        const updatedPerson = { ...existingPerson, number: newNumber };
+        mainService
+          .updateContact(updatedPerson.id, updatedPerson)
+          .then(
+            mainService.getAll().then((personsList) => setPersons(personsList))
+          );
+      }
+
       return;
     }
-    setPersons([...persons, { name: newName, number: newNumber }]);
+
+    mainService
+      .createNewContact({
+        name: newName,
+        number: newNumber,
+        id: persons.length + 1,
+      })
+      .then((newContact) => {
+        console.log(newContact);
+        setPersons(persons.concat(newContact));
+      });
+
     document.getElementById("myForm").reset();
+  };
+
+  const onDeletePerson = (person) => {
+    if (window.confirm(`Delete ${person.name}`)) {
+      mainService
+        .deleteContact(person.id)
+        .then(mainService.getAll().then((persons) => setPersons(persons)));
+    }
   };
 
   const filteredPersons =
@@ -86,7 +118,7 @@ const App = () => {
           onAddNewPerson={onAddNewPerson}
         />
         <h2>Numbers</h2>
-        <Persons persons={filteredPersons} />
+        <Persons persons={filteredPersons} onDelete={onDeletePerson} />
       </div>
       <div>
         <div>
