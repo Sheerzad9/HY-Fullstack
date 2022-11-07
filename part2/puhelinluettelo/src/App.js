@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import Notification from "./components/Notification";
+import PersonForm from "./components/PersonForm";
 import mainService from "./services/mainsvc";
 
 const Persons = ({ persons, onDelete }) => {
@@ -23,38 +25,26 @@ const Filter = ({ setFilter }) => {
   );
 };
 
-const PersonForm = ({ setNewName, setNewNumber, onAddNewPerson }) => {
-  return (
-    <form id="myForm">
-      <div>
-        name:{" "}
-        <input
-          onChange={(event) => {
-            setNewName(event.target.value);
-          }}
-        />
-      </div>
-      <div>
-        number: <input onChange={(e) => setNewNumber(e.target.value)} />
-      </div>
-      <div>
-        <button type="submit" onClick={onAddNewPerson}>
-          add
-        </button>
-      </div>
-    </form>
-  );
-};
-
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [notification, setNotification] = useState();
 
   useEffect(() => {
     mainService.getAll().then((initialPersons) => setPersons(initialPersons));
   }, []);
+
+  const setNotificationWithTimeout = (
+    notificationObj,
+    timeoutinMillis = 5000
+  ) => {
+    setNotification(notificationObj);
+    setTimeout(() => {
+      setNotification(null);
+    }, timeoutinMillis);
+  };
 
   const onAddNewPerson = (e) => {
     e.preventDefault();
@@ -70,8 +60,20 @@ const App = () => {
         mainService
           .updateContact(updatedPerson.id, updatedPerson)
           .then(
-            mainService.getAll().then((personsList) => setPersons(personsList))
-          );
+            mainService.getAll().then((personsList) => {
+              setPersons(personsList);
+              setNotificationWithTimeout({
+                type: "success",
+                message: `${updatedPerson.name} added succesfully`,
+              });
+            })
+          )
+          .catch((err) => {
+            setNotificationWithTimeout({
+              type: "error",
+              message: `${newName} was removed from db, can't update deleted person!`,
+            });
+          });
       }
 
       return;
@@ -84,8 +86,11 @@ const App = () => {
         id: persons.length + 1,
       })
       .then((newContact) => {
-        console.log(newContact);
         setPersons(persons.concat(newContact));
+        setNotificationWithTimeout({
+          type: "success",
+          message: `${newName} added succesfully`,
+        });
       });
 
     document.getElementById("myForm").reset();
@@ -95,7 +100,21 @@ const App = () => {
     if (window.confirm(`Delete ${person.name}`)) {
       mainService
         .deleteContact(person.id)
-        .then(mainService.getAll().then((persons) => setPersons(persons)));
+        .then(
+          mainService.getAll().then((persons) => {
+            setPersons(persons);
+            setNotificationWithTimeout({
+              type: "success",
+              message: `${person.name} deleted successfully!`,
+            });
+          })
+        )
+        .catch((err) => {
+          setNotification({
+            type: "error",
+            message: `${person.name} was already deleted from db`,
+          });
+        });
     }
   };
 
@@ -110,6 +129,7 @@ const App = () => {
     <div>
       <div>
         <h2>Phonebook</h2>
+        <Notification notification={notification} />
         <Filter setFilter={setFilter} />
         <h3>Add a new</h3>
         <PersonForm
