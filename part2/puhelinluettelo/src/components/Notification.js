@@ -1,6 +1,5 @@
 const Notification = ({ notification }) => {
-  console.log(notification);
-
+  console.log();
   const success = {
     color: "green",
     background: "light",
@@ -22,7 +21,6 @@ const Notification = ({ notification }) => {
   };
 
   if (!notification) {
-    console.log("Inside !notification");
     return;
   }
 

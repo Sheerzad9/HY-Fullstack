@@ -6,8 +6,8 @@ import mainService from "./services/mainsvc";
 const Persons = ({ persons, onDelete }) => {
   return (
     <div>
-      {persons.map((person) => (
-        <p key={person.name}>
+      {persons.map((person, i) => (
+        <p key={i}>
           {`Name: ${person.name}, Number: ${person.number}`}{" "}
           <button onClick={() => onDelete(person)}>Delete</button>{" "}
         </p>
@@ -59,15 +59,13 @@ const App = () => {
         const updatedPerson = { ...existingPerson, number: newNumber };
         mainService
           .updateContact(updatedPerson.id, updatedPerson)
-          .then(
-            mainService.getAll().then((personsList) => {
-              setPersons(personsList);
-              setNotificationWithTimeout({
-                type: "success",
-                message: `${updatedPerson.name} added succesfully`,
-              });
-            })
-          )
+          .then((updatedPersonsList) => {
+            setPersons(updatedPersonsList);
+            setNotificationWithTimeout({
+              type: "success",
+              message: `${updatedPerson.name} updated succesfully`,
+            });
+          })
           .catch((err) => {
             setNotificationWithTimeout({
               type: "error",
@@ -75,7 +73,6 @@ const App = () => {
             });
           });
       }
-
       return;
     }
 
@@ -83,10 +80,9 @@ const App = () => {
       .createNewContact({
         name: newName,
         number: newNumber,
-        id: persons.length + 1,
       })
-      .then((newContact) => {
-        setPersons(persons.concat(newContact));
+      .then((updatedPersonsList) => {
+        setPersons(updatedPersonsList);
         setNotificationWithTimeout({
           type: "success",
           message: `${newName} added succesfully`,
@@ -100,15 +96,13 @@ const App = () => {
     if (window.confirm(`Delete ${person.name}`)) {
       mainService
         .deleteContact(person.id)
-        .then(
-          mainService.getAll().then((persons) => {
-            setPersons(persons);
-            setNotificationWithTimeout({
-              type: "success",
-              message: `${person.name} deleted successfully!`,
-            });
-          })
-        )
+        .then((updatedPersonsList) => {
+          setPersons(updatedPersonsList);
+          setNotificationWithTimeout({
+            type: "success",
+            message: `${person.name} deleted successfully!`,
+          });
+        })
         .catch((err) => {
           setNotification({
             type: "error",
