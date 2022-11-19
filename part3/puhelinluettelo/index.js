@@ -1,6 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
+const User = require("./models/user");
 
 const app = express();
 
@@ -15,50 +16,20 @@ app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body")
 );
 
-let persons = [
-  {
-    id: 1,
-    name: "Lamar odom",
-    number: "112",
-  },
-  {
-    id: 2,
-    name: "Peruna Muusi",
-    number: "05451216878",
-  },
-  {
-    id: 3,
-    name: "Tuomas Mikkola",
-    number: "21654213218",
-  },
-  {
-    id: 4,
-    name: "Testi Tuutti",
-    number: "0541054894",
-  },
-];
-
-const generateId = () => Math.max(...persons.map((person) => person.id)) + 1;
-const checkForDuplicateName = (name) => {
-  const duplicatePerson = persons.find((person) => person.name === name);
-  return duplicatePerson ? true : false;
-};
+async function checkForDuplicateName(name) {
+  // Returns user with given name, else null
+  return await User.findOne({ name: name });
+}
 
 app.get("/api/persons", (req, res) => {
-  res.json(persons);
+  User.find({}).then((users) => res.json(users));
 });
 
 app.get("/api/persons/:id", (req, res) => {
-  const id = +req.params.id;
-  const person = persons.find((person) => id === person.id);
-
-  if (!person) {
-    return res
-      .status(404)
-      .send(`<h2>There is no person with the id: ${id}, in the db</h2>`);
-  }
-
-  res.json(person);
+  User.findById(req.params.id).then((user) => {
+    console.log(user);
+    res.json(user);
+  });
 });
 
 app.get("/info", (req, res) => {
@@ -67,7 +38,7 @@ app.get("/info", (req, res) => {
   );
 });
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", async (req, res) => {
   const body = req.body;
   if (!body.name || !body.number) {
     return res.status(404).json({
@@ -75,24 +46,25 @@ app.post("/api/persons", (req, res) => {
     });
   }
 
-  if (checkForDuplicateName(body.name)) {
+  const userIsDuplicate = await checkForDuplicateName(body.name);
+  if (userIsDuplicate) {
     return res.status(404).json({
       error: "There is already person with given name, name must be unique",
     });
   }
 
-  const newPerson = { name: body.name, number: +body.number, id: generateId() };
-  persons.push(newPerson);
-  res.status(200).json(persons);
+  const newUser = new User({ name: body.name, number: body.number });
+  newUser.save().then((savedPerson) => res.json(savedPerson));
 });
 
 app.put("/api/persons/:id", (req, res) => {
-  const id = +req.params.id;
-  persons.forEach((person) => {
-    if (person.id === id) person.number = req.body.number;
+  User.findByIdAndUpdate(
+    req.params.id,
+    { number: req.body.number },
+    { new: true }
+  ).then((updatedUser) => {
+    res.json(updatedUser);
   });
-
-  res.status(200).json(persons);
 });
 
 app.delete("/api/persons/:id", (req, res) => {

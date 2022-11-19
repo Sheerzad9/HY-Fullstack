@@ -59,8 +59,13 @@ const App = () => {
         const updatedPerson = { ...existingPerson, number: newNumber };
         mainService
           .updateContact(updatedPerson.id, updatedPerson)
-          .then((updatedPersonsList) => {
-            setPersons(updatedPersonsList);
+          .then((updatedPerson) => {
+            const copyArr = persons;
+            const indexOfUpdatedUser = persons.findIndex(
+              (person) => person.id === updatedPerson.id
+            );
+            copyArr[indexOfUpdatedUser] = updatedPerson;
+            setPersons(copyArr);
             setNotificationWithTimeout({
               type: "success",
               message: `${updatedPerson.name} updated succesfully`,
