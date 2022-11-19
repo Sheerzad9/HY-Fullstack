@@ -52,7 +52,6 @@ app.post("/api/persons", async (req, res) => {
       error: "There is already person with given name, name must be unique",
     });
   }
-
   const newUser = new User({ name: body.name, number: body.number });
   newUser.save().then((savedPerson) => res.json(savedPerson));
 });
