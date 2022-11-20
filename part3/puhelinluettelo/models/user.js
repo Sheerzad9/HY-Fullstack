@@ -19,8 +19,24 @@ mongoose
   });
 
 const userSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+  name: {
+    type: String,
+    minlength: 3,
+    required: true,
+  },
+  number: {
+    type: String,
+    minlength: 8,
+    validate: {
+      validator: function (numberToValidate) {
+        console.log("numberToValidate: ", numberToValidate);
+        return /^[0-9]{2,3}-[0-9]+$/g.test(numberToValidate);
+      },
+      message: (props) =>
+        `Number ${props.value} is not valid, should contain 2-3 number then '-' char and the rest of the numbers`,
+    },
+    required: true,
+  },
 });
 
 userSchema.set("toJSON", {

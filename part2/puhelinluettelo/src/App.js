@@ -87,11 +87,21 @@ const App = () => {
         number: newNumber,
       })
       .then((updatedPersonsList) => {
-        setPersons(updatedPersonsList);
+        setPersons(persons.concat(updatedPersonsList));
         setNotificationWithTimeout({
           type: "success",
           message: `${newName} added succesfully`,
         });
+      })
+      .catch((err) => {
+        console.log(err);
+        setNotificationWithTimeout(
+          {
+            type: "error",
+            message: err.response.data.error,
+          },
+          10000
+        );
       });
 
     document.getElementById("myForm").reset();

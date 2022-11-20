@@ -56,13 +56,8 @@ app.get("/info", (req, res, err) => {
     .catch((err) => next(err));
 });
 
-app.post("/api/persons", async (req, res) => {
+app.post("/api/persons", async (req, res, next) => {
   const body = req.body;
-  if (!body.name || !body.number) {
-    return res.status(404).json({
-      error: "Request was missing name or number (or maybe both.....)",
-    });
-  }
 
   const userIsDuplicate = await checkForDuplicateName(body.name);
   if (userIsDuplicate) {
@@ -71,7 +66,11 @@ app.post("/api/persons", async (req, res) => {
     });
   }
   const newUser = new User({ name: body.name, number: body.number });
-  newUser.save().then((savedPerson) => res.json(savedPerson));
+  // Will throw error if not matched with schema, see @ ./models/user.js
+  newUser
+    .save()
+    .then((savedPerson) => res.json(savedPerson))
+    .catch((err) => next(err));
 });
 
 app.put("/api/persons/:id", (req, res, next) => {
@@ -110,6 +109,8 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
   }
 
   next(error);
