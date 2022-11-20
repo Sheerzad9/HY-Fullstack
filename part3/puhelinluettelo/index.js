@@ -25,17 +25,35 @@ app.get("/api/persons", (req, res) => {
   User.find({}).then((users) => res.json(users));
 });
 
-app.get("/api/persons/:id", (req, res) => {
-  User.findById(req.params.id).then((user) => {
-    console.log(user);
-    res.json(user);
-  });
+app.get("/api/persons/:id", (req, res, next) => {
+  User.findById(req.params.id)
+    .then((user) => {
+      if (user) {
+        console.log(user);
+        res.json(user);
+      } else {
+        res
+          .status(404)
+          .json({ msg: `User with id: ${req.params.id} not found in the db` });
+      }
+    })
+    .catch((err) => {
+      next(err);
+    });
 });
 
-app.get("/info", (req, res) => {
-  res.send(
-    `<h2>phonebook has info for ${persons.length} people</h2><br/>${new Date()}`
-  );
+app.get("/info", (req, res, err) => {
+  User.find({})
+    .then((persons) => {
+      if (persons) {
+        res.send(
+          `<h2>phonebook has info for ${
+            persons.length
+          } people</h2><br/>${new Date()}`
+        );
+      }
+    })
+    .catch((err) => next(err));
 });
 
 app.post("/api/persons", async (req, res) => {
@@ -49,29 +67,55 @@ app.post("/api/persons", async (req, res) => {
   const userIsDuplicate = await checkForDuplicateName(body.name);
   if (userIsDuplicate) {
     return res.status(404).json({
-      error: "There is already person with given name, name must be unique",
+      error: `There is already person with given name: '${body.name}', name must be unique!`,
     });
   }
   const newUser = new User({ name: body.name, number: body.number });
   newUser.save().then((savedPerson) => res.json(savedPerson));
 });
 
-app.put("/api/persons/:id", (req, res) => {
+app.put("/api/persons/:id", (req, res, next) => {
   User.findByIdAndUpdate(
     req.params.id,
     { number: req.body.number },
     { new: true }
-  ).then((updatedUser) => {
-    res.json(updatedUser);
-  });
+  )
+    .then((updatedUser) => {
+      res.json(updatedUser);
+    })
+    .catch((err) => next(err));
 });
 
-app.delete("/api/persons/:id", (req, res) => {
-  const id = +req.params.id;
-  persons = persons.filter((person) => id !== person.id);
-
-  res.status(200).json(persons);
+app.delete("/api/persons/:id", (req, res, next) => {
+  User.findByIdAndDelete(req.params.id)
+    .then((result) => {
+      console.log("Result: ", result);
+      res.status(204).end();
+    })
+    .catch((err) => {
+      next(err);
+    });
 });
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" });
+};
+
+app.use(unknownEndpoint);
+
+const errorHandler = (error, request, response, next) => {
+  console.log(error);
+  console.error("Message: ", error.message);
+  console.log("Error name: ", error.name);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  }
+
+  next(error);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || "3001";
 app.listen(PORT, () => {

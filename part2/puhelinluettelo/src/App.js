@@ -97,21 +97,23 @@ const App = () => {
     document.getElementById("myForm").reset();
   };
 
-  const onDeletePerson = (person) => {
-    if (window.confirm(`Delete ${person.name}`)) {
+  const onDeletePerson = (personToDelete) => {
+    if (window.confirm(`Delete ${personToDelete.name}`)) {
       mainService
-        .deleteContact(person.id)
-        .then((updatedPersonsList) => {
-          setPersons(updatedPersonsList);
+        .deleteContact(personToDelete.id)
+        .then((deletedPerson) => {
+          setPersons(
+            persons.filter((person) => person.id !== personToDelete.id)
+          );
           setNotificationWithTimeout({
             type: "success",
-            message: `${person.name} deleted successfully!`,
+            message: `${personToDelete.name} deleted successfully!`,
           });
         })
         .catch((err) => {
           setNotification({
             type: "error",
-            message: `${person.name} was already deleted from db`,
+            message: `${personToDelete.name} was already deleted from db`,
           });
         });
     }
