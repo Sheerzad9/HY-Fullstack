@@ -1,11 +1,25 @@
-Tehtävä 0.4 uusi muistiinpano
+Tehtävä, 0.4 Uusi muistiinpano
 Kun käyttäjä lähettää uuden muistiin panon,
 selain -> palvelin: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note, (jonka payloadina löytyy kirjoittamamme muistiinpano)
 palvelin -> selain: lähettää vastauksen statusoodina 302
-applikaation tila on nyt muuttunut joten sivu renderöidään uudestaan ja sykli joka löytyy tehtävänannossa suoritetaan uudestan, sykli on seuraavanlainen: 
+pyynnön jälkeen sivu latautuu uudestaan ja sykli (kun tullaan aplikaation etusivulle) joka löytyy tehtävänannossa suoriutuu uudestan, sykli on seuraavanlainen: 
 selain->palvelin: HTTP GET https://studies.cs.helsinki.fi/exampleapp/notes
 palvelin-->selain: HTML-koodi
 selain->palvelin: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
 palvelin-->selain: main.css
 selain->palvelin: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.js
 palvelin-->selain: main.js
+Huom! tällä kertaa get pyyntö jolla saadaan data.json tiedosto palvelimelta (tämä tiedosto pitää sisällään kaikki muistiinpanot) pitää sisällään myös meidän aiemmin lähettämämme post requestin mukana mennyt uusi muistiinpanomme.
+
+Tehtävä, 0.5: Single Page App
+selain -> palvelin: HTTP GET https://studies.cs.helsinki.fi/exampleapp/spa, (vastauksena palvelimelta .html koodia statuksella 304)
+selain -> palvelin: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css (vastauksena palvelimelta main.css tiedostolla koodia joka liittyy aiemmin saatuun .html koodiin, status 304)
+selain -> palvelin: HTTP GET https://studies.cs.helsinki.fi/exampleapp/spa.js (vastauksena palvelimelta tuli spa.js tiedosto statuksella 304)
+selain -> palvelin: HTTP GET https://studies.cs.helsinki.fi/exampleapp/data.json (vastauksena palvelimelta tuli data.json tiedosto joka pitää sisällään kaikki muistiinpanot, vastauksen status 304)
+selain -> palvelin: HTTP GET https://studies.cs.helsinki.fi/favicon.ico (vastauksena .html koodia statuksella 200)
+
+Tehtävä 0.6 Uusi muistiinpano
+Tällä kertaa kun käyttäjä lähettää uuden muistiin panon (klikkaa Save nappia):
+selain -> palvelin HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa, jonka payloadina on muistiin pano muuttujassa "content" sekä kyseinen ajankohta muuttujassa "date".
+palvelin vastaa selaimelle json objektilla josta löytyy muuttuja "message" arvolla "note created", statuskoodi on 201.
+Toisin kun aiemmin, tällä kertaa sivu ei lataudu itsestään uudelleen, mutta uusi muistiinpano näkyy silti, mielenkiintoista :-)
