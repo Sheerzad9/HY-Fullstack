@@ -1,0 +1,11 @@
+Tehtävä 0.4 uusi muistiinpano
+Kun käyttäjä lähettää uuden muistiin panon,
+selain -> palvelin: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note, (jonka payloadina löytyy kirjoittamamme muistiinpano)
+palvelin -> selain: lähettää vastauksen statusoodina 302
+applikaation tila on nyt muuttunut joten sivu renderöidään uudestaan ja sykli joka löytyy tehtävänannossa suoritetaan uudestan, sykli on seuraavanlainen: 
+selain->palvelin: HTTP GET https://studies.cs.helsinki.fi/exampleapp/notes
+palvelin-->selain: HTML-koodi
+selain->palvelin: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
+palvelin-->selain: main.css
+selain->palvelin: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.js
+palvelin-->selain: main.js
