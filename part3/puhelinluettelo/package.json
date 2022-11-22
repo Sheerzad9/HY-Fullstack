@@ -10,7 +10,8 @@
     "build:ui": "rm -rf build && cd ../part2/puhelinluettelo && npm run build && cp -r build ../part3/puhelinluettelo",
     "deploy": "fly deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
-    "logs:prod": "fly logs"
+    "logs:prod": "fly logs",
+    "lint": "npx eslint ."
   },
   "keywords": [],
   "author": "Ali Sheerzad",
@@ -21,5 +22,8 @@
     "express": "^4.18.2",
     "mongoose": "^6.7.2",
     "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.28.0"
   }
 }
