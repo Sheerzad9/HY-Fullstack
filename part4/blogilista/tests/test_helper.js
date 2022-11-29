@@ -1,3 +1,5 @@
+const Blog = require("../models/blog");
+
 const initialBlogList = [
   {
     title: "How to not score goals",
@@ -13,4 +15,18 @@ const initialBlogList = [
   },
 ];
 
-module.exports = { initialBlogList };
+const nonExistingId = async () => {
+  const tempBlog = {
+    title: "Temp",
+    author: "Temp",
+    url: "Temp",
+  };
+
+  const blog = new Blog(tempBlog);
+  await blog.save();
+  await blog.remove();
+
+  return blog._id.toString();
+};
+
+module.exports = { initialBlogList, nonExistingId };
