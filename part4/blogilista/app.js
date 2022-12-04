@@ -4,6 +4,8 @@ const app = express();
 const middleware = require("./utils/middleware");
 const cors = require("cors");
 const blogsRouter = require("./controllers/blogs");
+const usersRouter = require("./controllers/users");
+const loginRouter = require("./controllers/login");
 const mongoose = require("mongoose");
 
 if (config.MONGODB_URI_WITH_PWD) {
@@ -18,7 +20,12 @@ app.use(express.static("build"));
 app.use(express.json());
 app.use(middleware.requestLogger);
 
+app.use("/api/login", loginRouter);
+app.use(middleware.tokenExtractor);
+app.use("/api/users", usersRouter);
+app.use(middleware.userExtractor);
 app.use("/api/blogs", blogsRouter);
+
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
 

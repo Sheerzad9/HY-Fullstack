@@ -1,28 +1,50 @@
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const Blog = require("../models/blog");
+const User = require("../models/user");
+const bcrypt = require("bcrypt");
 const helper = require("./test_helper");
 const app = require("../app");
 
 const api = supertest(app);
 
 describe("When there is initially some blogs set", () => {
+  let token = "";
   beforeEach(async () => {
+    // Let's initialize one user to db, so we can login and get the token.
+    await User.deleteMany({});
+    const passwordHash = await bcrypt.hash("notSoSecretPass", 10);
+    // Saving first testUser
+    let initialUser = new User({
+      username: "TestMania",
+      name: "Test123",
+      passwordHash,
+    });
+    intitialUser = await initialUser.save();
+    // Let's get the token
+    res = await api
+      .post("/api/login")
+      .send({ username: initialUser.username, password: "notSoSecretPass" }); // password is same we used @ line-16
+
+    token = res.body.token;
+
     await Blog.deleteMany({});
-    const promiseList = helper.initialBlogList.map((blog) =>
-      new Blog(blog).save()
-    );
+    const promiseList = helper.initialBlogList.map((blog, index) => {
+      // Keeping first blog without user id for test purposes
+      if (index !== 0) blog.user = initialUser._id.toString();
+      return new Blog(blog).save();
+    });
     await Promise.all(promiseList);
   });
 
-  test("notes are returned as json", async () => {
+  test("blogs are returned as json", async () => {
     await api
       .get("/api/blogs")
       .expect(200)
       .expect("Content-Type", /application\/json/);
   });
 
-  test("there are two notes", async () => {
+  test("there are two blogs", async () => {
     const response = await api.get("/api/blogs");
 
     expect(response.body).toHaveLength(helper.initialBlogList.length);
@@ -42,10 +64,14 @@ describe("When there is initially some blogs set", () => {
         url: "www.test.fi",
         likes: 2,
       };
-
-      await api.post("/api/blogs").send(badBlogData).expect(400).expect({
-        error: "Blog validation failed: title: Path `title` is required.",
-      });
+      await api
+        .post("/api/blogs")
+        .set({ Authorization: `bearer ${token}` })
+        .send(badBlogData)
+        .expect(400)
+        .expect({
+          error: "Blog validation failed: title: Path `title` is required.",
+        });
 
       const blogs = await Blog.find({});
       expect(blogs.length).toBe(helper.initialBlogList.length);
@@ -60,6 +86,7 @@ describe("When there is initially some blogs set", () => {
 
       await api
         .post("/api/blogs")
+        .set({ Authorization: `bearer ${token}` })
         .send(blogWithoutLike)
         .expect(201)
         .expect("Content-Type", /application\/json/);
@@ -81,6 +108,7 @@ describe("When there is initially some blogs set", () => {
 
       await api
         .post("/api/blogs")
+        .set({ Authorization: `bearer ${token}` })
         .send(blogToAdd)
         .expect(201)
         .expect("Content-Type", /application\/json/);
@@ -93,7 +121,7 @@ describe("When there is initially some blogs set", () => {
     });
   });
 
-  describe("Viewing spesific blog", () => {
+  describe("Viewing specific blog", () => {
     test("Succeed's with valid id", async () => {
       const blogs = await Blog.find({});
 
@@ -125,11 +153,29 @@ describe("When there is initially some blogs set", () => {
   });
 
   describe("deletion of a blog", () => {
-    test("succeeds with status code 204 if id is valid", async () => {
-      const blogsAtStart = await Blog.find({});
-      const blogToDelete = blogsAtStart[0];
+    test("Deleting return 401 if user is not the blogs writer", async () => {
+      const blogs = await Blog.find({});
+      const blogWithDifferentIDThanUsers = blogs[0];
 
-      await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+      await api
+        .delete(`/api/blogs/${blogWithDifferentIDThanUsers.id}`)
+        .set({ Authorization: `bearer ${token}` })
+        .expect(401)
+        .expect({
+          error:
+            "You don't have authority to delete this blog, you can delete only your own blogs!",
+        });
+    });
+
+    test("succeeds with status code 200 if id & user token is valid (same user as blogs creator)", async () => {
+      const blogsAtStart = await Blog.find({});
+      const blogToDelete = blogsAtStart[1];
+
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set({ Authorization: `bearer ${token}` })
+        .expect(200)
+        .expect({ message: "Blog deleted successfully." });
 
       const blogsAtEnd = await Blog.find({});
 
