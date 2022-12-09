@@ -1,17 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Notification from "./components/Notification";
 import Blog from "./components/Blog";
 import Login from "./components/Login";
 import CreateBlogForm from "./components/CreateBlogForm";
 import blogService from "./services/blogs";
+import Togglable from "./components/Togglable";
 
 const App = () => {
   const [notification, setNotification] = useState(null);
   const [blogs, setBlogs] = useState([]);
   const [user, setUser] = useState(null);
 
+  const blogFormRef = useRef();
+
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
+    blogService.getAll().then((blogs) => {
+      const sortedBlogDescendingOrd = blogs.sort((a, b) => {
+        if (a.likes === b.likes) return 0;
+        return a.likes > b.likes ? -1 : 1;
+      });
+      setBlogs(sortedBlogDescendingOrd);
+    });
     if (user) blogService.setToken(user.token);
   }, [user, notification]);
 
@@ -27,6 +36,10 @@ const App = () => {
 
     window.localStorage.clear();
     setUser(null);
+  };
+
+  const blogCreatedSuccessfully = () => {
+    blogFormRef.current.changeVisibility();
   };
 
   if (!user) {
@@ -52,9 +65,14 @@ const App = () => {
       <div>
         <h2 style={{ color: "green" }}>{user.name} is logged in</h2>
         <h2>blogs</h2>
-        <CreateBlogForm setNotification={setNotification}></CreateBlogForm>
+        <Togglable buttonLabel="Create new blog" ref={blogFormRef}>
+          <CreateBlogForm
+            setNotification={setNotification}
+            onBlogCreatedSuccessfully={blogCreatedSuccessfully}
+          ></CreateBlogForm>
+        </Togglable>
         {blogs.map((blog) => (
-          <Blog key={blog.id} blog={blog} />
+          <Blog key={blog.id} blog={blog} setNotification={setNotification} />
         ))}
       </div>
     </div>

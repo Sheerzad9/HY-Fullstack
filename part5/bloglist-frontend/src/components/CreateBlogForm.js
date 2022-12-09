@@ -1,14 +1,14 @@
 import blogService from "../services/blogs";
 
-const CreateBlogForm = ({ setNotification }) => {
+const CreateBlogForm = ({ setNotification, onBlogCreatedSuccessfully }) => {
   let title, author, url;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("title: ", title, ", author: ", author, ", url: ", url);
     try {
       await blogService.createBlog({ title, author, url });
+      onBlogCreatedSuccessfully();
       setNotification({
         type: "success",
         message: "Blog created successfully!",
@@ -23,6 +23,12 @@ const CreateBlogForm = ({ setNotification }) => {
       }, 5000);
       console.log("Error: ", e);
     }
+  };
+
+  // TEST PURPOSES
+  const handleClick = (e) => {
+    e.preventDefault();
+    onBlogCreatedSuccessfully();
   };
 
   return (
@@ -54,6 +60,9 @@ const CreateBlogForm = ({ setNotification }) => {
         </div>
         <button type="submit">Create</button>
       </form>
+      <div>
+        <button onClick={handleClick}>Click Me!</button>
+      </div>
     </div>
   );
 };

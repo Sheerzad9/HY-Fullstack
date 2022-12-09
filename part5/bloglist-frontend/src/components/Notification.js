@@ -1,5 +1,4 @@
 const Notification = ({ notification }) => {
-  console.log("Hello from notification, ", notification);
   if (!notification) return;
 
   if (notification.type === "error") {

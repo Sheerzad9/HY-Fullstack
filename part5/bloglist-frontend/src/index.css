@@ -16,3 +16,8 @@
   padding: 10px;
   margin-bottom: 10px;
 }
+
+.blog {
+  border: solid black 1px;
+  padding: 10px;
+}
