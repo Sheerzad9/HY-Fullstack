@@ -1,12 +1,12 @@
 const Notification = ({ notification }) => {
-  if (!notification) return;
+  if (!notification) return
 
-  if (notification.type === "error") {
-    return <div className="error">{notification.message}</div>;
+  if (notification.type === 'error') {
+    return <div className="error">{notification.message}</div>
   }
 
   // Else it's success at the momemnt..
-  return <div className="success">{notification.message}</div>;
-};
+  return <div className="success">{notification.message}</div>
+}
 
-export default Notification;
+export default Notification

@@ -1,29 +1,30 @@
-import { useState } from "react";
-import loginService from "../services/login";
-import blogService from "../services/blogs";
+import { useState } from 'react'
+import loginService from '../services/login'
+import blogService from '../services/blogs'
+import PropTypes from 'prop-types'
 
 const Login = ({ setUser, setNotification }) => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      const user = await loginService.login({ username, password });
-      window.localStorage.setItem("loggedInUser", JSON.stringify(user));
-      blogService.setToken(user.token);
-      setUser(user);
+      const user = await loginService.login({ username, password })
+      window.localStorage.setItem('loggedInUser', JSON.stringify(user))
+      blogService.setToken(user.token)
+      setUser(user)
     } catch (e) {
       setNotification({
-        type: "error",
-        message: "Wrong username or password!",
-      });
+        type: 'error',
+        message: 'Wrong username or password!',
+      })
       setTimeout(() => {
-        setNotification(null);
-      }, 5000);
-      console.log("Error: ", e);
+        setNotification(null)
+      }, 5000)
+      console.log('Error: ', e)
     }
-  };
+  }
 
   return (
     <>
@@ -48,7 +49,12 @@ const Login = ({ setUser, setNotification }) => {
         <button type="submit">Login</button>
       </form>
     </>
-  );
-};
+  )
+}
 
-export default Login;
+Login.propTypes = {
+  setUser: PropTypes.func.isRequired,
+  setNotification: PropTypes.func.isRequired,
+}
+
+export default Login

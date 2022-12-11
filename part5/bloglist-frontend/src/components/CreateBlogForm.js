@@ -1,35 +1,35 @@
-import blogService from "../services/blogs";
+import blogService from '../services/blogs'
 
 const CreateBlogForm = ({ setNotification, onBlogCreatedSuccessfully }) => {
-  let title, author, url;
+  let title, author, url
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
     try {
-      await blogService.createBlog({ title, author, url });
-      onBlogCreatedSuccessfully();
+      await blogService.createBlog({ title, author, url })
+      onBlogCreatedSuccessfully()
       setNotification({
-        type: "success",
-        message: "Blog created successfully!",
-      });
+        type: 'success',
+        message: 'Blog created successfully!',
+      })
       setTimeout(() => {
-        setNotification(null);
-      }, 5000);
+        setNotification(null)
+      }, 5000)
     } catch (e) {
-      setNotification({ type: "error", message: e });
+      setNotification({ type: 'error', message: e })
       setTimeout(() => {
-        setNotification(null);
-      }, 5000);
-      console.log("Error: ", e);
+        setNotification(null)
+      }, 5000)
+      console.log('Error: ', e)
     }
-  };
+  }
 
   // TEST PURPOSES
   const handleClick = (e) => {
-    e.preventDefault();
-    onBlogCreatedSuccessfully();
-  };
+    e.preventDefault()
+    onBlogCreatedSuccessfully()
+  }
 
   return (
     <div>
@@ -64,7 +64,7 @@ const CreateBlogForm = ({ setNotification, onBlogCreatedSuccessfully }) => {
         <button onClick={handleClick}>Click Me!</button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CreateBlogForm;
+export default CreateBlogForm
