@@ -1,35 +1,29 @@
-import blogService from '../services/blogs'
+import blogService from "../services/blogs";
 
 const CreateBlogForm = ({ setNotification, onBlogCreatedSuccessfully }) => {
-  let title, author, url
+  let title, author, url;
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
-      await blogService.createBlog({ title, author, url })
-      onBlogCreatedSuccessfully()
+      await blogService.createBlog({ title, author, url });
+      onBlogCreatedSuccessfully();
       setNotification({
-        type: 'success',
-        message: 'Blog created successfully!',
-      })
+        type: "success",
+        message: "Blog created successfully!",
+      });
       setTimeout(() => {
-        setNotification(null)
-      }, 5000)
+        setNotification(null);
+      }, 5000);
     } catch (e) {
-      setNotification({ type: 'error', message: e })
+      setNotification({ type: "error", message: e });
       setTimeout(() => {
-        setNotification(null)
-      }, 5000)
-      console.log('Error: ', e)
+        setNotification(null);
+      }, 5000);
+      console.log("Error: ", e);
     }
-  }
-
-  // TEST PURPOSES
-  const handleClick = (e) => {
-    e.preventDefault()
-    onBlogCreatedSuccessfully()
-  }
+  };
 
   return (
     <div>
@@ -37,6 +31,7 @@ const CreateBlogForm = ({ setNotification, onBlogCreatedSuccessfully }) => {
         <div>
           title:
           <input
+            id="blog_title"
             type="text"
             value={title}
             onChange={({ target }) => (title = target.value)}
@@ -45,6 +40,7 @@ const CreateBlogForm = ({ setNotification, onBlogCreatedSuccessfully }) => {
         <div>
           author:
           <input
+            id="blog_author"
             type="text"
             value={author}
             onChange={({ target }) => (author = target.value)}
@@ -53,18 +49,18 @@ const CreateBlogForm = ({ setNotification, onBlogCreatedSuccessfully }) => {
         <div>
           url:
           <input
+            id="blog_url"
             type="text"
             value={url}
             onChange={({ target }) => (url = target.value)}
           ></input>
         </div>
-        <button type="submit">Create</button>
+        <button id="submit_blog_btn" type="submit">
+          Create
+        </button>
       </form>
-      <div>
-        <button onClick={handleClick}>Click Me!</button>
-      </div>
     </div>
-  )
-}
+  );
+};
 
-export default CreateBlogForm
+export default CreateBlogForm;

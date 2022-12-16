@@ -26,7 +26,7 @@ const Blog = ({ blog, setNotification }) => {
 
   const handleLike = async () => {
     try {
-      const updatedBlog = await blogService.updateBlogLikes({
+      await blogService.updateBlogLikes({
         newLikes: blog.likes + 1,
         blogId: blog.id,
       });
@@ -46,12 +46,15 @@ const Blog = ({ blog, setNotification }) => {
   return (
     <div className="blog" data-testid="blog">
       {!showDetails ? (
-        <>
+        <div>
           Title: {blog.title}{" "}
-          <button onClick={() => setShowDetails(!showDetails)}>
+          <button
+            id="show_more_btn"
+            onClick={() => setShowDetails(!showDetails)}
+          >
             Show more
           </button>
-        </>
+        </div>
       ) : (
         <>
           Title: {blog.title}
@@ -60,7 +63,10 @@ const Blog = ({ blog, setNotification }) => {
           <br />
           Url: {blog.url}
           <br />
-          Likes: {blog.likes} <button onClick={handleLike}>Like</button>
+          Likes: {blog.likes}{" "}
+          <button id="like_blog_btn" onClick={handleLike}>
+            Like
+          </button>
           <br />
           <button onClick={() => setShowDetails(!showDetails)}>
             Show Less
