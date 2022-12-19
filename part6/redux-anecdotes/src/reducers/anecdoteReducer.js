@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import anecdoteService from "../services/anecdotes";
 
 const anecdotesAtStart = [
   "If it hurts, do it more often",
@@ -23,25 +24,51 @@ const initialState = anecdotesAtStart.map(asObject);
 
 const anecdoteSlice = createSlice({
   name: "anecdotes",
-  initialState,
+  initialState: [],
   reducers: {
     updateVotes(state, action) {
-      const anecdoteId = action.payload;
+      const anecdoteData = action.payload;
       const indexToUpdate = state
         .map((anecdote) => anecdote.id)
-        .indexOf(anecdoteId);
+        .indexOf(anecdoteData.id);
       // We can change state right here because reduxjs/toolkit uses immer.js behind the scenes
-      state[indexToUpdate] = {
-        ...state[indexToUpdate],
-        votes: state[indexToUpdate].votes + 1,
-      };
+      state[indexToUpdate] = anecdoteData;
     },
-    createNewAnecdote(state, action) {
+    addNewAnecdote(state, action) {
       // Same here! we can update state because immer.js
-      state.push({ content: action.payload, id: getId(), votes: 0 });
+      state.push(action.payload);
+    },
+    setAnecdotes(state, action) {
+      return action.payload;
     },
   },
 });
 
-export const { updateVotes, createNewAnecdote } = anecdoteSlice.actions;
+export const { updateVotes, addNewAnecdote, setAnecdotes } =
+  anecdoteSlice.actions;
+
+export const initializeAnecdotes = () => {
+  return async function (dispatch) {
+    const anecdotes = await anecdoteService.getAll();
+    dispatch(setAnecdotes(anecdotes));
+  };
+};
+
+export const newAnecdote = (content) => {
+  return async function (dispatch) {
+    const newAnecdote = await anecdoteService.addAnecdote(content);
+    dispatch(addNewAnecdote(newAnecdote));
+  };
+};
+
+export const updateAnecdoteVote = (anecdoteData) => {
+  return async function (dispatch) {
+    console.log("inside reducer anecdoteData: ", anecdoteData);
+    const updatedAnecdote = await anecdoteService.updateAnecdoteVote(
+      anecdoteData
+    );
+    dispatch(updateVotes(updatedAnecdote));
+  };
+};
+
 export default anecdoteSlice.reducer;
