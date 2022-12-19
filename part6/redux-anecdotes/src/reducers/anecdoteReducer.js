@@ -1,3 +1,5 @@
+import { createSlice } from "@reduxjs/toolkit";
+
 const anecdotesAtStart = [
   "If it hurts, do it more often",
   "Adding manpower to a late software project makes it later!",
@@ -17,49 +19,29 @@ const asObject = (anecdote) => {
   };
 };
 
-export const actionFuncs = {
-  updateVotes: function (anecdoteId) {
-    return {
-      type: "UPDATE_ANECDOTE_VOTES",
-      data: {
-        anecdoteId,
-      },
-    };
-  },
-  createNewAnecdote: function (content) {
-    return {
-      type: "NEW_ANECDOTE",
-      data: {
-        content,
-        id: getId(),
-        votes: 0,
-      },
-    };
-  },
-};
-
 const initialState = anecdotesAtStart.map(asObject);
 
-const reducer = (state = initialState, action) => {
-  console.log("state now: ", state);
-  console.log("action", action);
-
-  switch (action.type) {
-    case "UPDATE_ANECDOTE_VOTES":
+const anecdoteSlice = createSlice({
+  name: "anecdotes",
+  initialState,
+  reducers: {
+    updateVotes(state, action) {
+      const anecdoteId = action.payload;
       const indexToUpdate = state
         .map((anecdote) => anecdote.id)
-        .indexOf(action.data.anecdoteId);
-      const newArr = [...state];
-      newArr[indexToUpdate] = {
-        ...newArr[indexToUpdate],
-        votes: newArr[indexToUpdate].votes + 1,
+        .indexOf(anecdoteId);
+      // We can change state right here because reduxjs/toolkit uses immer.js behind the scenes
+      state[indexToUpdate] = {
+        ...state[indexToUpdate],
+        votes: state[indexToUpdate].votes + 1,
       };
-      return newArr;
-    case "NEW_ANECDOTE":
-      return [...state, action.data];
-    default:
-      return state;
-  }
-};
+    },
+    createNewAnecdote(state, action) {
+      // Same here! we can update state because immer.js
+      state.push({ content: action.payload, id: getId(), votes: 0 });
+    },
+  },
+});
 
-export default reducer;
+export const { updateVotes, createNewAnecdote } = anecdoteSlice.actions;
+export default anecdoteSlice.reducer;
