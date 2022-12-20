@@ -1,17 +1,13 @@
-import { useDispatch } from "react-redux";
+import { connect } from "react-redux";
 import { setFilter, clearFilter } from "../reducers/filterReducer";
 
-const FilterForm = () => {
-  const dispatch = useDispatch();
-
+const FilterForm = (props) => {
   const handleChange = (e) => {
     e.preventDefault();
     const filterText = e.target.value.trim();
-    if (filterText.length === 0) dispatch(clearFilter());
+    if (filterText.length === 0) props.clearFilter();
 
-    dispatch(setFilter(filterText));
-    // console.log("Value: ", e.target.value);
-    // console.log("Trimmed empty length: ", e.target.value.trim().length);
+    props.setFilter(filterText);
   };
 
   return (
@@ -21,4 +17,4 @@ const FilterForm = () => {
   );
 };
 
-export default FilterForm;
+export default connect(null, { setFilter, clearFilter })(FilterForm);

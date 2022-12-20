@@ -1,4 +1,4 @@
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector, useDispatch, connect } from "react-redux";
 import { updateAnecdoteVote } from "../reducers/anecdoteReducer";
 import { setNotification } from "../reducers/notificationReducer";
 
@@ -14,7 +14,7 @@ const Anecdote = ({ anecdote, handleVote }) => {
   );
 };
 
-const AnecdoteList = () => {
+const AnecdoteList = (props) => {
   let myFilter;
   const dispatch = useDispatch();
   let anecdotes = useSelector(({ anecdotes, filter }) => {
@@ -32,15 +32,13 @@ const AnecdoteList = () => {
   }
 
   const handleVote = (anecdote) => {
+    console.log("props inside dunc: ", props);
     const updatedAnecdote = { ...anecdote, votes: anecdote.votes + 1 };
-    console.log("anecdote: ", updatedAnecdote);
     dispatch(updateAnecdoteVote(updatedAnecdote));
+    if (props.activeNotification) clearTimeout(props.activeNotification);
     dispatch(
       setNotification({ message: `you voted '${anecdote.content}'` }, 5)
     );
-    // setTimeout(() => {
-    //   dispatch(clearNotification());
-    // }, 5000);
   };
 
   return (
@@ -61,4 +59,10 @@ const AnecdoteList = () => {
   );
 };
 
-export default AnecdoteList;
+const mapStateToProps = (state) => {
+  return {
+    activeNotification: state.notification.activeNotification,
+  };
+};
+
+export default connect(mapStateToProps)(AnecdoteList);

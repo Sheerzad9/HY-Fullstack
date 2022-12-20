@@ -5,6 +5,7 @@ const notificationSlice = createSlice({
   initialState: {
     message: null,
     type: null,
+    activeNotification: null,
   },
   reducers: {
     handleNotification(state, action) {
@@ -15,6 +16,7 @@ const notificationSlice = createSlice({
       return {
         message: null,
         type: null,
+        activeNotification: null,
       };
     },
   },
@@ -24,10 +26,11 @@ export const { handleNotification, clearNotification } =
 
 export const setNotification = (notificationData, customTimeoutInSeconds) => {
   return function (dispatch) {
-    dispatch(handleNotification(notificationData));
-    setTimeout(() => {
+    const activeNotification = setTimeout(() => {
       dispatch(clearNotification());
     }, customTimeoutInSeconds * 1000);
+
+    dispatch(handleNotification({ ...notificationData, activeNotification }));
   };
 };
 

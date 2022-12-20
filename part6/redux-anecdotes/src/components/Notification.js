@@ -1,11 +1,6 @@
-import { useSelector } from "react-redux";
+import { connect } from "react-redux";
 
-const Notification = () => {
-  const notification = useSelector((state) => {
-    console.log("state notification: ", state.notification);
-    return state.notification;
-  });
-
+const Notification = (props) => {
   const errorStyle = {
     border: "solid red",
     padding: 10,
@@ -18,12 +13,20 @@ const Notification = () => {
     padding: 10,
     borderWidth: 1,
   };
-  if (notification.message)
+  if (props.notification.message)
     return (
-      <div style={notification.type === "error" ? errorStyle : successStyle}>
-        {notification.message}
+      <div
+        style={props.notification.type === "error" ? errorStyle : successStyle}
+      >
+        {props.notification.message}
       </div>
     );
 };
 
-export default Notification;
+const mapStateToProps = (state) => {
+  return {
+    notification: state.notification,
+  };
+};
+
+export default connect(mapStateToProps)(Notification);
