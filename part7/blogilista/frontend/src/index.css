@@ -1,0 +1,39 @@
+table,
+th,
+td {
+  border: 1px solid black;
+  padding: 5px;
+}
+
+.error {
+  color: red;
+  background: lightgrey;
+  font-size: 20px;
+  border: solid red;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.success {
+  color: rgb(86, 248, 86);
+  background: lightgrey;
+  font-size: 20px;
+  border: solid green;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.blog {
+  border: solid black 1px;
+  padding: 10px;
+}
+
+.loggedInUser {
+  color: rgb(86, 248, 86);
+  background: lightgrey;
+  font-size: 20px;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
